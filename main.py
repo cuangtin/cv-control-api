@@ -1,32 +1,19 @@
 from fastapi import FastAPI
-from fastapi.routing import APIRoute
-from fastapi.middleware.cors import CORSMiddleware
+from dotenv import dotenv_values
+from pymongo import MongoClient
+from routes import router as cv_router
 
-from api.main import api_router
-from core.config import settings
+config = dotenv_values(".env")
 
+app = FastAPI()
 
-def custom_generate_unique_id(route: APIRoute) -> str:
-    return f"{route.tags[0]}-{route.name}"
+@app.on_event("startup")
+def startup_db_client():
+    app.mongodb_client = MongoClient(config["MONGODB_URI"])
+    app.database = app.mongodb_client[config["MONGODB_NAME"]]
 
-print(settings.API_V1_STR)
+@app.on_event("shutdown")
+def shutdown_db_client():
+    app.mongodb_client.close()
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    generate_unique_id_function=custom_generate_unique_id,
-)
-
-# Set all CORS enabled origins
-# if settings.BACKEND_CORS_ORIGINS:
-#     app.add_middleware(
-#         CORSMiddleware,
-#         allow_origins=[
-#             str(origin).strip("/") for origin in settings.BACKEND_CORS_ORIGINS
-#         ],
-#         allow_credentials=True,
-#         allow_methods=["*"],
-#         allow_headers=["*"],
-#     )
-
-app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(cv_router, tags=["items"], prefix=config["API_V1_STR"])

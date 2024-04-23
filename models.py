@@ -1,17 +1,10 @@
-from typing import Optional, List
+import uuid
+from typing import Optional
 from pydantic import BaseModel, Field
-from typing_extensions import Annotated
-from pydantic.functional_validators import BeforeValidator
+from bson import ObjectId
 
-# Represents an ObjectId field in the database.
-# It will be represented as a `str` on the model so that it can be serialized to JSON.
-PyObjectId = Annotated[str, BeforeValidator(str)]
-
-class CVModel(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+class CV(BaseModel):
+    id: str = Field(default_factory=uuid.uuid4, alias="_id")
     content: str = Field(...)
     link: str = Field(...)
-
-
-class CVCollection(BaseModel):
-    cv_list: List[CVModel]
+        

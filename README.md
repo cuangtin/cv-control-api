@@ -1,7 +1,9 @@
 #### Installation
 pip install fastapi pymongo pydantic pydantic_settings "uvicorn[standard]"
 
-> Import cv-control.lists.json to mongodb 
+> Import cv-control.lists.json to mongodb
+
+uvicorn main:app --reload
 
 #### The command ``uvicorn main:app --reload`` refers to:
 
